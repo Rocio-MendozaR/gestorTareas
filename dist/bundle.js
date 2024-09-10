@@ -10,26 +10,47 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   addTasks: () => (/* binding */ addTasks),
-/* harmony export */   getTasks: () => (/* binding */ getTasks)
+/* harmony export */   addTask: () => (/* binding */ addTask),
+/* harmony export */   deleteTask: () => (/* binding */ deleteTask),
+/* harmony export */   getTasks: () => (/* binding */ getTasks),
+/* harmony export */   updateTask: () => (/* binding */ updateTask)
 /* harmony export */ });
 // Lista de tareas
 var tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
 // Función para agregar tareas
-var addTasks = function addTasks(task) {
+var addTask = function addTask(task) {
   var nweTask = {
     id: Date.now(),
     text: task,
     completed: false
   };
-  task.push(nweTask);
+  tasks.push(nweTask);
   localStorage.setItem('tasks', JSON.stringify(tasks));
 };
 
 // Función para poder traer la lista de tarea
 var getTasks = function getTasks() {
   return tasks;
+};
+
+// Función para eliminar una tarea de la lista
+var deleteTask = function deleteTask(id) {
+  tasks = tasks.filter(function (task) {
+    return task.id !== parseInt(id);
+  });
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+};
+
+//Función para actualizar una tarea
+var updateTask = function updateTask(id) {
+  tasks = tasks.map(function (tasks) {
+    if (tasks.id === parseInt(id)) {
+      tasks.completed = !tasks.completed;
+    }
+    return tasks;
+  });
+  localStorage.setItem('tasks', JSON.stringify(tasks));
 };
 
 /***/ }),
@@ -58,7 +79,7 @@ var renderTasks = function renderTasks() {
     if (task.completed === true) {
       li.classList.add("completed");
     }
-    li.innerHTML = "\n            ".concat(task.tex, "\n            <button class=\"delete\"> Eliminar </button>\n            <button class=\"toggle\">").concat(task.completed === false ? "Completar" : "Deshacer", "</button>\n        ");
+    li.innerHTML = "\n            ".concat(task.text, "\n            <button class=\"delete\"> Eliminar </button>\n            <button class=\"toggle\">").concat(task.completed === false ? "Completar" : "Deshacer", "</button>\n        ");
     taskList.appendChild(li);
   });
 };
@@ -138,15 +159,29 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("task-form").addEventListener("submit", function (e) {
     e.preventDefault();
     var taskInput = document.getElementById("task-input");
-    if (taskInput.value !== "") {
+    if (taskInput.value !== " ") {
       // Agregamos la tarea
-      (0,_task__WEBPACK_IMPORTED_MODULE_1__.addTasks)(taskInput.value);
+      (0,_task__WEBPACK_IMPORTED_MODULE_1__.addTask)(taskInput.value);
 
       // Volvemos a cargar la lista de tareas
       (0,_ui__WEBPACK_IMPORTED_MODULE_0__.renderTasks)();
 
       //Limpiar el input
       document.getElementById("task-input").value = "";
+    }
+  });
+
+  // Agregar el evento para los botones
+  document.getElementById("task-list").addEventListener("click", function (e) {
+    if (e.target.classList.contains("delete")) {
+      var taskId = e.target.parentElement.getAttribute("data-id");
+      (0,_task__WEBPACK_IMPORTED_MODULE_1__.deleteTask)(taskId);
+      (0,_ui__WEBPACK_IMPORTED_MODULE_0__.renderTasks)();
+    }
+    if (e.target.classList.contains("toggle")) {
+      var _taskId = e.target.parentElement.getAttribute("data-id");
+      (0,_task__WEBPACK_IMPORTED_MODULE_1__.updateTask)(_taskId);
+      (0,_ui__WEBPACK_IMPORTED_MODULE_0__.renderTasks)();
     }
   });
 });
